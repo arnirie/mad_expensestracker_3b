@@ -31,6 +31,59 @@ class _ExpensesEntryState extends State<ExpensesEntry> {
     setState(() {});
   }
 
+  void dismissEntry() {
+    // Navigator.pop(context);
+    Navigator.of(context).pop();
+  }
+
+  void insertItem() {
+    //validate input
+    var errorMessage = '';
+    if (descController.text == '') {
+      errorMessage = 'Description is required.';
+      showAlert(errorMessage);
+      return;
+    }
+    var amount = double.tryParse(amountController.text);
+    if (amount == null || amount <= 0) {
+      errorMessage = 'Amount should be greater than zero';
+      showAlert(errorMessage);
+      return;
+    }
+    if (selectedDate == null) {
+      errorMessage = 'Please select a date';
+      showAlert(errorMessage);
+      return;
+    }
+
+    //add list
+    widget.addItem(
+      ExpensesItem(
+          description: descController.text,
+          amount: amount ?? 0,
+          date: selectedDate!),
+    );
+    dismissEntry();
+  }
+
+  void showAlert(String errorMessage) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(errorMessage),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('OK'),
+          )
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -66,23 +119,14 @@ class _ExpensesEntryState extends State<ExpensesEntry> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               TextButton(
-                onPressed: () {
-                  // Navigator.pop(context);
-                  Navigator.of(context).pop();
-                },
+                onPressed: dismissEntry,
                 child: const Text('Cancel'),
               ),
               Gap(8),
               ElevatedButton(
-                  onPressed: () {
-                    //call addItem
-                    widget.addItem(ExpensesItem(
-                        description: descController.text,
-                        amount: double.parse(amountController.text),
-                        date: selectedDate!));
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('ADD')),
+                onPressed: insertItem,
+                child: const Text('ADD'),
+              ),
             ],
           )
         ],
